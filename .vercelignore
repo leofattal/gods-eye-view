@@ -1,0 +1,7 @@
+.env
+.env.*
+.gev-cache
+.gev-logs
+dist
+node_modules
+.vercel

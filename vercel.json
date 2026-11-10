@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/gev?__gevpath=/api/:path*" }
+  ],
+  "functions": {
+    "api/gev.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "{src/**,server/**,build/**,package.json}"
+    }
+  }
+}
