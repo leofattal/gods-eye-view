@@ -1,4 +1,8 @@
 import { createOpenAiChatHandler } from './openai/chat.js';
+import {
+  chatUsesAnthropic,
+  createAnthropicChatHandler,
+} from './anthropic/chat.js';
 import { defaultSourceRoot } from './common/source-root.js';
 import { handleHudSummary } from './openai/hud-summary.js';
 import { createDebugLogHandler } from './openai/debug-log.js';
@@ -23,9 +27,15 @@ function openAiRealtimeProxy({
 } = {}) {
   const oauthLogin = createCodexOAuthLogin(realtime);
   function install(middlewares) {
-    middlewares.use(
-      '/api/openai/chat',
-      createOpenAiChatHandler({ ...realtime, annotationGuidance }),
+    // Typed chat keeps one browser wire format; Claude serves it when an
+    // Anthropic key is configured (see server/providers/anthropic/chat.js).
+    const openAiChat = createOpenAiChatHandler({
+      ...realtime,
+      annotationGuidance,
+    });
+    const anthropicChat = createAnthropicChatHandler({ annotationGuidance });
+    middlewares.use('/api/openai/chat', (req, res) =>
+      chatUsesAnthropic() ? anthropicChat(req, res) : openAiChat(req, res),
     );
     // Cost-bearing and log endpoints refuse cross-site browser requests
     // (see server/providers/common/same-site.js and SECURITY.md).

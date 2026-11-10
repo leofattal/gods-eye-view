@@ -15,6 +15,7 @@ import {
 } from '../scopeMask.js';
 import { KEYHOLE_OUTER_RADIUS } from '../celestialRing.js';
 import { installGlobeInViewRecovery } from './viewer.js';
+import { installDisplayXR } from './displayxr.js';
 import { installLayerReleaseTrim } from '../sceneCommandRelease.js';
 import {
   installRenderGovernor,
@@ -143,6 +144,12 @@ export function createApplicationTools({
   // nothing animates per frame. Installed AFTER every module above has had
   // its chance to register pre-install holds. (perf wave 2)
   installRenderGovernor(viewer);
+  // Glasses-free 3D on DisplayXR spatial displays; a no-op in other browsers.
+  const displayXR = installDisplayXR(viewer).catch((error) => {
+    console.warn('[displayxr] stereo unavailable', error);
+    return null;
+  });
+  defer(() => displayXR.then((dispose) => dispose?.()));
   // Cesium keeps a turned-off layer's draw commands (and so all its entities)
   // alive in reused per-pass arrays; trim them after each disable.
   defer(

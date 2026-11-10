@@ -22,7 +22,7 @@ const callShape = (call) =>
   typeof call.function.name === 'string' &&
   call.function.name.length <= 128 &&
   typeof call.function.arguments === 'string';
-function assistantShape(message) {
+export function assistantShape(message) {
   return (
     object(message) &&
     keys(message, ['role', 'content', 'tool_calls']) &&
@@ -37,7 +37,7 @@ function assistantShape(message) {
           message.tool_calls.length))
   );
 }
-function validMessages(messages) {
+export function validMessages(messages) {
   if (!Array.isArray(messages) || !messages.length || messages.length > 96)
     return false;
   let pending = [];

@@ -17,6 +17,23 @@ export function invalidCalls(calls, tools) {
 
 // Missing usage stays unknown, never an invented zero-cost request.
 export function parseUsage(provider, data) {
+  if (provider === 'anthropic') {
+    const u = data?.usage;
+    const n = (value) =>
+      Number.isSafeInteger(value) && value >= 0 ? value : null;
+    const output = n(u?.output_tokens);
+    const uncached = n(u?.input_tokens);
+    if (output === null || uncached === null) return null;
+    const cached = n(u?.cache_read_input_tokens) ?? 0;
+    const input = uncached + cached + (n(u?.cache_creation_input_tokens) ?? 0);
+    return {
+      inputTokens: input,
+      outputTokens: output,
+      totalTokens: input + output,
+      reasoningTokens: 0,
+      cachedInputTokens: cached,
+    };
+  }
   const raw = provider === 'gemini' ? data?.usageMetadata : data?.usage;
   const number = (value) =>
     Number.isSafeInteger(value) && value >= 0 ? value : null;
